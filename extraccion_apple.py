@@ -1,44 +1,51 @@
-import time
+import requests
 import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 
-def datos_apple():
-    driver = ChromeDriverManager().install()
-    s = Service(driver)
-    opc = Options()
-    opc.add_argument("--window-size=1020,1200")
-    navegador = webdriver.Chrome(service=s, options=opc)
-    navegador.get("https://mx.investing.com/equities/apple-computer-inc-balance-sheet")
-    time.sleep(10)
 
-    soup = BeautifulSoup(navegador.page_source, "html5lib")
-    tabla = soup.find("table", attrs={"class": "noHover"})
-
-    datosDiccionario = {
-        "Cuenetas": [],
-        "2024/300-03": [],
-        "2023/30-12": [],
-        "2023/30-09": [],
-        "2023/01-07": []
+def iniciar_extraccion():
+    url = "https://mx.investing.com/equities/apple-computer-inc-balance-sheet"
+    cabeceras_http = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     }
 
-    for row in tabla.find_all("tr")[1:]:
-        valores = row.find_all("td")
-        datosDiccionario["Total de activos corrientes"].append(valores[0].text)
-        datosDiccionario["2024/300-03"].append(valores[1].text)
-        datosDiccionario["2023/30-12"].append(valores[2].text)
-        datosDiccionario["2023/30-09"].append(valores[3].text)
-        datosDiccionario["2023/01-07"].append(valores[4].text)
+    respuesta = requests.get(url, headers=cabeceras_http)
 
-    df = pd.DataFrame(datosDiccionario)
-    df.to_csv("datasets/apple.csv")
-    time.sleep(5)
-    navegador.close()
+    if respuesta.status_code == 200:
+        sopa = BeautifulSoup(respuesta.content, "html5lib")
+
+        # Encuentra la tabla de balance
+        tabla = sopa.find("table", attrs={"class": "genTbl reportTbl"})
+
+        if not tabla:
+            raise Exception("No se encontró la tabla de balance.")
+
+        # Extrae las cabeceras
+        cabeceras = [th.text.strip() for th in tabla.find_all("th")]
+        print("Cabeceras encontradas:", cabeceras)
+
+        # Extrae las filas de datos
+        filas = []
+        for tr in tabla.find_all("tr")[1:]:  # Saltamos el encabezado
+            celdas = tr.find_all("td")
+            fila = [celda.text.strip() for celda in celdas]
+            filas.append(fila)
+
+        # Visualiza algunas filas
+        for fila in filas[:5]:
+            print(fila)
+
+        filas_validas = [fila for fila in filas if len(fila) == len(cabeceras)]
+
+        # Creacion de un DataFrame
+        df = pd.DataFrame(filas_validas, columns=cabeceras)
+        print(df.sample(10))
+        df.to_csv("datasets/apple_balance.csv", index=False)
+    else:
+        raise Exception("Ocurrió un error al hacer la solicitud HTTP!")
+
 
 if __name__ == "__main__":
-    datos_apple()
+    iniciar_extraccion()
+
+
