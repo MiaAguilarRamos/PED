@@ -40,7 +40,7 @@ def iniciar_extraccion():
         # Creacion de un DataFrame
         df = pd.DataFrame(filas_validas, columns=cabeceras)
         print(df.sample(10))
-        df.to_csv("datasets/apple_balance.csv", index=False)
+        df.to_csv("Datasets/apple_balance.csv", index=False)
     else:
         raise Exception("Ocurrió un error al hacer la solicitud HTTP!")
 

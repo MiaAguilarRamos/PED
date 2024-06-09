@@ -5,7 +5,7 @@ from mysql.connector import Error
 
 def TablasBG():
     try:
-        datos = pd.read_csv("apple_balance.csv")
+        datos = pd.read_csv("Datasets/apple_balance.csv")
         datos = datos.dropna()
 
         datos.replace('-', 0, inplace=True)
@@ -28,25 +28,25 @@ def TablasBG():
         cursor = conexion.cursor()
 
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS BG_Trime_Apple (
+            CREATE TABLE IF NOT EXISTS Datos_Apple (
                 Cuenta VARCHAR(100),
-                Primero INT,
-                Segundo INT,
-                Tercero INT,
-                Cuarto INT
+                `2024-31/03` INT,
+                `2023-31/12` INT,
+                `2023-30/09` INT,
+                `2023-30/06` INT
             )
         """)
 
 
         cursor.executemany("""
-            INSERT INTO BG_Trime_Apple (Cuenta, Primero, Segundo, Tercero, Cuarto)
+            INSERT INTO Datos_Apple (Cuenta, `2024-31/03`, `2023-31/12`, `2023-30/09`, `2023-30/06`)
             VALUES (%s, %s, %s, %s, %s)
         """, lista_valores)
 
 
         conexion.commit()
 
-        cursor.execute("SELECT * FROM BG_Trime_Apple")
+        cursor.execute("SELECT * FROM Datos_Apple")
         resultado = cursor.fetchall()
 
         for fila in resultado:
