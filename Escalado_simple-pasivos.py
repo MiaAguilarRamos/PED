@@ -22,48 +22,48 @@ def obtener_datos(conexion, tabla):
     df = pd.read_sql(query, conexion)
 
     # Encontrar la fila del "Total activo"
-    total_activo_fila = df[df['Cuenta'] == 'Total activo']
-    if total_activo_fila.empty:
-        raise ValueError("La fila 'Total activo' no está presente en los datos")
+    total_pasivo_fila = df[df['Cuenta'] == 'Total Pasivo']
+    if total_pasivo_fila.empty:
+        raise ValueError("La fila 'Total Pasivo' no está presente en los datos")
 
-    # Extraer los valores de "Total activo"
-    total_activo_valores = total_activo_fila.iloc[0, 1:].astype(float)
+    # Extraer los valores de "Total Paivoivo"
+    total_Pasivo_valores = total_pasivo_fila.iloc[0, 1:].astype(float)
 
-    # Filtrar las filas de activos (antes de "Total activo")
-    activos_df = df[df.index < total_activo_fila.index[0]]
+    # Filtrar las filas de activos (antes de "Total Pasivo")
+    activos_df = df[df.index < total_pasivo_fila.index[0]]
 
     # Calcular el porcentaje integral (análisis vertical)
     for col in activos_df.columns[1:]:
-        activos_df[f'{col}_porcentaje'] = activos_df.max[col] / total_activo_valores.max[col]
+        activos_df[f'{col}_porcentaje'] = pasivo_df.max[col] / total_pasivo_valores.max[col]
 
-    # Añadir la fila de "Total activo" de vuelta al DataFrame
-    activos_df = pd.concat([activos_df, total_activo_fila])
+    # Añadir la fila de "Total pasivo" de vuelta al DataFrame
+    activos_df = pd.concat([activos_df, total_pasivo_fila])
 
     return activos_df
 
 def dibujar(data_spotify: pd.DataFrame, data_apple: pd.DataFrame):
     # Crear gráficos
-    fig_spotify = px.line(data_spotify, x=" Activos Totales", y=[col for col in data_spotify.columns if 'Empresa' in col],
+    fig_spotify = px.line(data_spotify, x=" Pasivo Totales", y=[col for col in data_spotify.columns if 'Empresa' in col],
                           title="Spotify Balance _Escalado Simple-")
     fig_spotify.update_yaxes(dtick=5)  # Ajustar la escala vertical a 5 en 5
 
-    fig_apple = px.line(data_apple, x="Activos Totales", y=[col for col in data_apple.columns if 'Empresa' in col],
+    fig_apple = px.line(data_apple, x="Pasivo Totales", y=[col for col in data_apple.columns if 'Empresa' in col],
                         title="Apple Balance -Escalado Simple-")
     fig_apple.update_yaxes(dtick=5)  # Ajustar la escala vertical a 5 en 5
 
-    titulo = "Escalado Simple de Activos Totales"
+    titulo = "Escalado Simple de Pasivo Totales"
     body = html.Div([
         html.H2(titulo, style={"textAlign": "center", "color": "blue"}),
         html.P(
-            "Escalado simple de Activos Totales",
+            "Escalado simple de Pasivo Totales",
             style={"color": "white"}  # Cambiar el color de la letra a blanco
         ),
         html.Hr(),
         dcc.Graph(figure=fig_spotify),
         dcc.Graph(figure=fig_apple),
-        html.H3("Activos Totales(Spotify)", style={"textAlign": "center", "color": "green"}),
+        html.H3("Pasivos Totales(Spotify)", style={"textAlign": "center", "color": "green"}),
         dash_table.DataTable(data=data_spotify.to_dict("records"), page_size=10),
-        html.H3("Activos Totales (Apple)", style={"textAlign": "center", "color": "red"}),
+        html.H3("Pasivos Totales (Apple)", style={"textAlign": "center", "color": "red"}),
         dash_table.DataTable(data=data_apple.to_dict("records"), page_size=10)
     ], style={"background": "black"})
     return body
