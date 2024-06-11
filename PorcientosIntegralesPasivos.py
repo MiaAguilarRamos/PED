@@ -1,4 +1,3 @@
-
 import pandas as pd
 import plotly.express as px
 from dash import html, dcc, dash_table
@@ -52,8 +51,16 @@ def dibujar_pasivos(data_spotify, data_apple):
         dcc.Graph(figure=fig_spotify),
         dcc.Graph(figure=fig_apple),
         html.H3("Porcientos Integrales (Spotify)", style={"textAlign": "center", "color": "green"}),
-        dash_table.DataTable(data=data_spotify.to_dict("records"), page_size=10),
+        dash_table.DataTable(
+            data=data_spotify.to_dict("records"),
+            page_size=10,
+            style_cell={'textAlign': 'left'}
+        ),
         html.H3("Porcientos Integrales (Apple)", style={"textAlign": "center", "color": "red"}),
-        dash_table.DataTable(data=data_apple.to_dict("records"), page_size=10)
+        dash_table.DataTable(
+            data=data_apple.to_dict("records"),
+            page_size=10,
+            style_cell={'textAlign': 'left'}
+        )
     ], style={"background": "black"})
     return body
